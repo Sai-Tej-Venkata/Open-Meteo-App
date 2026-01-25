@@ -1,3 +1,6 @@
+using Weather_API.Interfaces;
+using Weather_API.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Add HttpClient and services for dependency injection
+builder.Services.AddHttpClient<IHttpService, HttpService>();
+builder.Services.AddScoped<IOpenMeteoClientService, OpenMeteoClientService>();
 
 var app = builder.Build();
 
@@ -45,6 +52,11 @@ else
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors(policy =>
+    policy.AllowAnyOrigin()
+          .AllowAnyMethod()
+          .AllowAnyHeader());
 
 app.MapControllers();
 
