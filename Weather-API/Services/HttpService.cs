@@ -68,7 +68,7 @@ namespace Weather_API.Services
 
                 if (!string.IsNullOrEmpty(daily))
                 {
-                    queryParams.Add($"daily={daily}");
+                    queryParams.Add($"daily={daily.Replace(" ", "")}");
                 }
 
                 if (!string.IsNullOrEmpty(hourly))
@@ -76,8 +76,7 @@ namespace Weather_API.Services
                     queryParams.Add($"hourly={hourly}");
                 }
 
-                //var url = $"/v1/archive?{string.Join("&", queryParams)}";
-                var url = $"https://archive-api.open-meteo.com/v1/archive?latitude=32.78&longitude=96.8&start_date=2021-02-27&end_date=2021-02-27&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto";
+                var url = $"https://archive-api.open-meteo.com/v1/archive?{string.Join("&", queryParams)}";
                 return await GetAsync<HistoricalWeatherResponse>(url);
             }
             catch (Exception ex)

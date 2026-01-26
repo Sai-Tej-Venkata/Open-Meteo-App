@@ -4,7 +4,7 @@ namespace Weather_API.Interfaces
 {
     public interface IOpenMeteoClientService
     {
-        Task<HistoricalWeatherResponse?> GetWeatherAsync(
+        Task<List<HistoricalWeatherResponse?>> GetWeatherAsync(
             double latitude,
             double longitude,
             string startDate,

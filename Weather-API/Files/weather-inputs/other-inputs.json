@@ -1,0 +1,6 @@
+﻿{
+  "latitude": 32.78,
+  "longitude": 96.8,
+  "daily": "temperature_2m_max, temperature_2m_min, precipitation_sum",
+  "timezone": "auto"
+}

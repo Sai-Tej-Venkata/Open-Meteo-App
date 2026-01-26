@@ -29,7 +29,7 @@
   <ItemGroup>
     <Content Include="ClientApp\dist\**\*.*" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
-
+  
   <!-- Build the client app during publish if package.json exists -->
   <Target Name="BuildClient" BeforeTargets="PrepareForPublish" Condition="Exists('$(SpaRoot)package.json')">
     <Message Importance="high" Text="Restoring and building SPA located at $(SpaRoot)" />

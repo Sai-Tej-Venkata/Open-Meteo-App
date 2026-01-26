@@ -5,7 +5,7 @@ using Weather_API.Services;
 namespace Weather_API.Controllers
 {
     [ApiController]
-    [Route("api/v1/Weather")]
+    [Route("api/v1/weather")]
     public class OpenMeteoClientController : ControllerBase
     {
         private readonly IOpenMeteoClientService _service;
@@ -16,7 +16,7 @@ namespace Weather_API.Controllers
         }
 
         [HttpGet]
-        public async Task<HistoricalWeatherResponse> GetWeather(
+        public async Task<List<HistoricalWeatherResponse?>> GetWeather(
             double latitude = 0d,
             double longitude = 0d,
             string startDate = "",
