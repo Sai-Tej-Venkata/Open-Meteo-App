@@ -40,6 +40,13 @@ namespace Weather_API.Services
                     inputs.Daily,
                     hourly,
                     inputs.Timezone);
+                
+                // Save the JSON response to a file
+                if (val != null)
+                {
+                    SaveWeatherDataToFile(val, dateRange.Start);
+                }
+                
                 results.Add(val);
             }
 
@@ -77,12 +84,12 @@ namespace Weather_API.Services
                 else
                 {
                     errors.Add($"Invalid date format: {line}");
-                    // Commented below is the Copilot generated exception-throw
+                    // TEJ: Commented below is the Copilot generated exception-throw
                     //throw new FormatException($"Unable to parse date: {line}. Please use a valid date format.");
                 }
             }
 
-            // Commented below is the Copilot generated dates-sort.
+            // TEJ: Commented below is the Copilot generated dates-sort.
             // parsedDates.Sort();
 
             for (int i = 0; i < parsedDates.Count; i += 1)
@@ -121,6 +128,40 @@ namespace Weather_API.Services
             }
 
             return inputs;
+        }
+
+        private void SaveWeatherDataToFile(HistoricalWeatherResponse response, string startDate)
+        {
+            try
+            {
+                // Create the weather-data folder if it doesn't exist
+                var weatherDataFolder = Path.Combine(_env.ContentRootPath, @"Files\weather-data");
+                if (!Directory.Exists(weatherDataFolder))
+                {
+                    Directory.CreateDirectory(weatherDataFolder);
+                }
+
+                // Create filename using the start date
+                var fileName = $"{startDate}.json";
+                var filePath = Path.Combine(weatherDataFolder, fileName);
+
+                // Serialize the response to JSON
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    // TEJ: Changed Copilot-generated JsonIgnoreCondition.WhenWritingNull to Never.
+                    DefaultIgnoreCondition = JsonIgnoreCondition.Never
+                };
+
+                var jsonContent = JsonSerializer.Serialize(response, options);
+
+                // Write the JSON to the file
+                File.WriteAllText(filePath, jsonContent);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to save weather data to file for date {startDate}", ex);
+            }
         }
     }
 
