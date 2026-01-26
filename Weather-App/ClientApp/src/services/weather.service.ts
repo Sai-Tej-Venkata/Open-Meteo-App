@@ -47,7 +47,7 @@ export class WeatherService {
       console.error('   - Backend server is not running');
       console.error('   - CORS policy may be blocking the request');
       console.error('   - Check if https://localhost:7174 is accessible');
-      console.error('   - Try: dotnet run in the Weather-API directory');
+      console.error('   - Try: dotnet run in the Weather-App directory');
     }
   }
 }

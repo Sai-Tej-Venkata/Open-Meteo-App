@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Weather_API.Interfaces;
+using Weather_App.Interfaces;
 
-namespace Weather_API.Services
+namespace Weather_App.Services
 {
     public class OpenMeteoClientService : IOpenMeteoClientService
     {
@@ -18,8 +18,8 @@ namespace Weather_API.Services
         public async Task<List<HistoricalWeatherResponse?>> GetWeatherAsync(
             double latitude,
             double longitude,
-            string startDate,
-            string endDate,
+            string? startDate,
+            string? endDate,
             string? daily = null,
             string? hourly = null,
             string? timezone = "auto")

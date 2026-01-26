@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using Weather_API.Interfaces;
+using Weather_App.Interfaces;
 
-namespace Weather_API.Services
+namespace Weather_App.Services
 {
     public class HttpService : IHttpService
     {
@@ -49,11 +49,11 @@ namespace Weather_API.Services
         public async Task<HistoricalWeatherResponse?> GetHistoricalWeatherAsync(
             double latitude,
             double longitude,
-            string startDate,
-            string endDate,
+            string? startDate,
+            string? endDate,
             string? daily = null,
             string? hourly = null,
-            string? timezone = "auto")
+            string? timezone = null)
         {
             try
             {

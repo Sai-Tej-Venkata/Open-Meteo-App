@@ -1,4 +1,4 @@
-namespace Weather_API
+namespace Weather_App
 {
     public class WeatherForecast
     {

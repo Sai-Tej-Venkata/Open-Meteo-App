@@ -14,19 +14,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0-nanoserver-ltsc2022 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Weather-API/Weather-API.csproj", "Weather-API/"]
-RUN dotnet restore "./Weather-API/Weather-API.csproj"
+COPY ["Weather-App/Weather-App.csproj", "Weather-App/"]
+RUN dotnet restore "./Weather-App/Weather-App.csproj"
 COPY . .
-WORKDIR "/src/Weather-API"
-RUN dotnet build "./Weather-API.csproj" -c %BUILD_CONFIGURATION% -o /app/build
+WORKDIR "/src/Weather-App"
+RUN dotnet build "./Weather-App.csproj" -c %BUILD_CONFIGURATION% -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Weather-API.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Weather-App.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Weather-API.dll"]
+ENTRYPOINT ["dotnet", "Weather-App.dll"]

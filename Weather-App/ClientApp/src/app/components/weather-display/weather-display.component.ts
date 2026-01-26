@@ -31,22 +31,22 @@ export class WeatherDisplayComponent implements OnInit {
 
   ngOnInit(): void {
     this.errorMessage.set(null);
-    
-    console.log('ngOnInit: Calling weatherService.getWeather()');
-    
+
     // Test endpoint first
-    this.weatherService.testConnection().subscribe({
-      next: (response) => {
-        console.log('✅ Backend connection successful:', response);
-      },
-      error: (error) => {
-        console.error('❌ Backend connection failed:', error);
-        this.errorMessage.set('Cannot reach backend API. Ensure it is running on https://localhost:7174');
-      }
-    });
+    //this.weatherService.testConnection().subscribe({
+    //  next: (response) => {
+    //    console.log('✅ Backend connection successful:', response);
+    //  },
+    //  error: (error) => {
+    //    console.error('❌ Backend connection failed:', error);
+    //    this.errorMessage.set('Cannot reach backend API. Ensure it is running on https://localhost:7174');
+    //  }
+    //});
   }
 
   fetchWeatherData(): void {
+    console.log('ngOnInit: Calling weatherService.getWeather()');
+
     this.isLoading.set(true);
 
     this.weatherService.getWeather().subscribe({

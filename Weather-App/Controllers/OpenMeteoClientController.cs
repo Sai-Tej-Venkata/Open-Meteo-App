@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Weather_API.Interfaces;
-using Weather_API.Services;
+using Weather_App.Interfaces;
+using Weather_App.Services;
 
-namespace Weather_API.Controllers
+namespace Weather_App.Controllers
 {
     [ApiController]
     [Route("api/v1/weather")]
@@ -17,14 +17,15 @@ namespace Weather_API.Controllers
 
         [HttpGet]
         public async Task<List<HistoricalWeatherResponse?>> GetWeather(
-            double latitude = 0d,
-            double longitude = 0d,
-            string startDate = "",
-            string endDate = "",
-            string daily = "",
-            string timeZone = "")
+            double latitude,
+            double longitude,
+            string? startDate = "",
+            string? endDate = "",
+            string? daily = null,
+            string? hourly = null,
+            string? timeZone = "auto")
         {
-            return await _service.GetWeatherAsync(latitude, longitude, startDate, endDate, daily, timeZone);
+            return await _service.GetWeatherAsync(latitude, longitude, startDate, endDate, daily, hourly, timeZone);
         }
     }
 }
