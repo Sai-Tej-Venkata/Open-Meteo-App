@@ -145,6 +145,13 @@ namespace Weather_API.Services
                 var fileName = $"{startDate}.json";
                 var filePath = Path.Combine(weatherDataFolder, fileName);
 
+                // Check if file exists and has content
+                if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
+                {
+                    // File exists and is not empty, skip saving
+                    return;
+                }
+
                 // Serialize the response to JSON
                 var options = new JsonSerializerOptions
                 {

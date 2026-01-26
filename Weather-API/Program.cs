@@ -9,11 +9,33 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Add CORS policy - Allow requests from localhost Angular app
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .DisallowCredentials();
+    });
+});
+
 // Add HttpClient and services for dependency injection
 builder.Services.AddHttpClient<IHttpService, HttpService>();
 builder.Services.AddScoped<IOpenMeteoClientService, OpenMeteoClientService>();
 
 var app = builder.Build();
+
+// Log all registered routes in development
+if (app.Environment.IsDevelopment())
+{
+    Console.WriteLine("=== Registered Routes ===");
+    foreach (var endpoint in app.Services.GetService<IEnumerable<EndpointDataSource>>()?.FirstOrDefault()?.Endpoints ?? Enumerable.Empty<Endpoint>())
+    {
+        Console.WriteLine(endpoint.DisplayName);
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -49,16 +71,21 @@ else
     app.MapFallbackToFile("index.html");
 }
 
+// IMPORTANT: Apply middleware in correct order
 app.UseHttpsRedirection();
+
+// Apply CORS policy BEFORE authorization
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-app.UseCors(policy =>
-    policy.AllowAnyOrigin()
-          .AllowAnyMethod()
-          .AllowAnyHeader());
-
+// Map controllers
 app.MapControllers();
 
+// Add a diagnostic endpoint
+app.MapGet("/api/health", () => Results.Ok(new { status = "ok", timestamp = DateTime.UtcNow }))
+    .AllowAnonymous();
+
 app.Run();
+
 
