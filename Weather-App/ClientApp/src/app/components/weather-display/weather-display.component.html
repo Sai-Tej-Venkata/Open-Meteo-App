@@ -1,6 +1,28 @@
 <div class="weather-display-container">
 
-  <button (click)="fetchWeatherData()">Update Weather Data</button>
+  <h1 class="app-title">Weather App</h1>
+
+  <div class="app-section">
+    <h2>Geo Coordinates</h2>
+  </div>
+
+  <div class="weather-index">
+    <label>Latitude:</label>
+    <div class="geo-coords">
+      <input type="number" [value]="latitude" step="0.01" (input)="updateLatitude($event.target.value)" />
+    </div>
+  </div>
+
+  <div class="weather-index">
+    <label>Longitude:</label>
+    <div class="geo-coords">
+      <input type="number" [value]="longitude" step="0.01" (input)="updateLongitude($event.target.value)" />
+    </div>
+  </div>
+
+  <div>
+    <button (click)="fetchWeatherData()">Get Weather Data</button>
+  </div>
 
   <!-- Loader while API call is in progress -->
   <div *ngIf="isLoading()" class="loader-container">
@@ -9,15 +31,35 @@
   </div>
 
   <div *ngIf="weatherDataExists">
-    <h2>Weather Data</h2>
+    <div class="app-section">
+      <h2>Weather Data</h2>
+    </div>
+
+    <div class="weather-index">
+      <label>Latitude:</label>
+      {{weatherIndex().latitude}}
+    </div>
+
+    <div class="weather-index">
+      <label>Longitude:</label>
+      {{weatherIndex().longitude}}
+    </div>
+
+    <div class="weather-index">
+      <label>Timezone:</label>
+      {{weatherIndex().timezone}}
+    </div>
+
     <table class="weather-table">
       <thead>
         <tr>
-          <th>Date</th>
+          <th (click)="toggleDateSort()">
+            Date
+            <span>{{ dateSortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
           <th>Temperature Max (°C)</th>
           <th>Temperature Min (°C)</th>
           <th>Precipitation (mm)</th>
-          <th>Weather Code</th>
         </tr>
       </thead>
       <tbody>
@@ -26,9 +68,19 @@
           <td>{{ item.temperatureMax }}</td>
           <td>{{ item.temperatureMin }}</td>
           <td>{{ item.precipitation }}</td>
-          <td>{{ item.weatherCode }}</td>
         </tr>
       </tbody>
     </table>
+
+    <div class="app-section">
+      <h2>Errors</h2>
+    </div>
+
+    <div *ngFor="let errors of weatherApiErrors()">
+      <div class="flagError"> {{ errors[1] }}</div>
+    </div>
+
+    <p></p>
+
   </div>
 </div>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -23,9 +23,14 @@ export class WeatherService {
     );
   }
 
-  getWeather(): Observable<any> {
+  getWeather(latitude: number, longitude: number): Observable<any> {
     console.log('Fetching weather from:', this.apiUrl);
-    return this.http.get<any>(this.apiUrl).pipe(
+
+    const params = new HttpParams()
+      .set('latitude', latitude)
+      .set('longitude', longitude);
+
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
       catchError((error: HttpErrorResponse) => {
         this.logError('Weather API call failed', error);
         return throwError(() => error);
@@ -43,11 +48,7 @@ export class WeatherService {
     });
 
     if (error.status === 0) {
-      console.error('🔴 Network Error Detected:');
-      console.error('   - Backend server is not running');
-      console.error('   - CORS policy may be blocking the request');
-      console.error('   - Check if https://localhost:7174 is accessible');
-      console.error('   - Try: dotnet run in the Weather-App directory');
+      console.error('🔴 Network Error Detected or Backend server is not running');
     }
   }
 }

@@ -1,14 +1,25 @@
 import { Component, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { WeatherService } from '../../../services/weather.service';
+import { WeatherService } from '../../services/weather.service';
+
+interface WeatherDataIndex {
+  latitude: number;
+  longitude: number;
+  timezone: string;
+}
 
 interface WeatherDataItem {
   date: string;
   temperatureMax: number;
   temperatureMin: number;
   precipitation: number;
-  weatherCode: number;
 }
+
+interface WeatherErros {
+  date: string;
+  error: string;
+}
+
 
 @Component({
   selector: 'app-weather-display',
@@ -17,7 +28,16 @@ interface WeatherDataItem {
   styleUrl: './weather-display.component.scss',
 })
 export class WeatherDisplayComponent implements OnInit {
+  latitude: number = 32.78;
+  longitude: number = 96.8;
+
+  weatherIndex = signal<WeatherDataIndex>({
+    latitude: 0,
+    longitude: 0,
+    timezone: ''
+  });
   weatherData = signal<WeatherDataItem[]>([]);
+  weatherApiErrors = signal<[string, string][]>([]);
   errorMessage = signal<string | null>(null);
   isLoading = signal<boolean>(false);
 
@@ -32,7 +52,9 @@ export class WeatherDisplayComponent implements OnInit {
   ngOnInit(): void {
     this.errorMessage.set(null);
 
-    // Test endpoint first
+    //this.dateSortDirection = 'asc';
+
+    // Test health-check endpoint first
     //this.weatherService.testConnection().subscribe({
     //  next: (response) => {
     //    console.log('✅ Backend connection successful:', response);
@@ -45,14 +67,16 @@ export class WeatherDisplayComponent implements OnInit {
   }
 
   fetchWeatherData(): void {
+    this.weatherData.set([]);
     console.log('ngOnInit: Calling weatherService.getWeather()');
 
     this.isLoading.set(true);
 
-    this.weatherService.getWeather().subscribe({
+    this.weatherService.getWeather(this.latitude, this.longitude).subscribe({
       next: (data) => {
         console.log('✅ Weather data received:', data);
         this.transformAndSetWeatherData(data);
+
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -68,20 +92,31 @@ export class WeatherDisplayComponent implements OnInit {
       console.log('Transforming weather data...');
       const allWeatherData: WeatherDataItem[] = [];
 
-      // Transform ALL responses, not just the first one
-      if (Array.isArray(apiResponse) && apiResponse.length > 0) {
-        apiResponse.forEach((response: any, responseIndex: number) => {
-          console.log(`Processing response ${responseIndex + 1} of ${apiResponse.length}`);
+      const weatherResult = apiResponse.weatherDataList;
+      const resultErrors = apiResponse.errorsHash;
+      if (weatherResult.length === 0 || resultErrors == null) {
+        console.warn('⚠️ No data received from API');
+        this.errorMessage.set('No weather data available');
+        return;
+      }
+      else if (Array.isArray(weatherResult) && weatherResult.length > 0) {
+        weatherResult.forEach((response: any, responseIndex: number) => {
+          console.log(`Processing response ${responseIndex + 1} of ${weatherResult.length}`);
+
+          this.weatherIndex.set({
+            latitude: response?.latitude,
+            longitude: response?.longitude,
+            timezone: response?.timezone
+          });
 
           if (response?.daily) {
-            const { time, temperature_2m_max, temperature_2m_min, precipitation, weather_code } = response.daily;
+            const { time, temperature_2m_max, temperature_2m_min, precipitation } = response.daily;
 
             const transformedRecords = time?.map((date: string, index: number) => ({
               date,
               temperatureMax: temperature_2m_max?.[index] ?? 0,
               temperatureMin: temperature_2m_min?.[index] ?? 0,
               precipitation: precipitation?.[index] ?? 0,
-              weatherCode: weather_code?.[index] ?? 0
             })) || [];
 
             allWeatherData.push(...transformedRecords);
@@ -90,13 +125,73 @@ export class WeatherDisplayComponent implements OnInit {
 
         console.log(`✅ Transformed ${allWeatherData.length} total weather records from ${apiResponse.length} response(s)`);
         this.weatherData.set(allWeatherData);
-      } else {
-        console.warn('⚠️ No data received from API');
-        this.errorMessage.set('No weather data available');
       }
+
+      if (resultErrors != null) {
+        console.log(`Processing errors - ` + resultErrors);
+
+        //for (const [key, value] of Object.entries(resultErrors)) { console.log('Key:', key); console.log('Value:', value); }
+
+        this.weatherApiErrors.set(Object.entries(resultErrors));
+        console.log(this.weatherApiErrors());
+
+        /*
+        resultErrors.forEach((response: any, responseIndex: number) => {
+          console.log(`Processing error ${responseIndex + 1} of ${weatherResult.length}`);
+
+          if (response) {
+            const { date, error } = response;
+
+            console.log(date, error);
+
+            //const transformedRecords = time?.map((date: string, index: number) => ({
+            //  date,
+            //  temperatureMax: temperature_2m_max?.[index] ?? 0,
+            //  temperatureMin: temperature_2m_min?.[index] ?? 0,
+            //  precipitation: precipitation?.[index] ?? 0,
+            //})) || [];
+
+            //allWeatherData.push(...transformedRecords);
+          }
+        });
+
+        console.log(`✅ Transformed ${allWeatherData.length} total weather records from ${apiResponse.length} response(s)`);
+        this.weatherData.set(allWeatherData);
+        */
+      }
+
     } catch (error) {
       console.error('❌ Error transforming weather data:', error);
       this.errorMessage.set('Error processing weather data');
     }
   }
+
+  updateLatitude(value: string) {
+    this.latitude = Number(value)
+  }
+
+  updateLongitude(value: string) {
+      this.longitude = Number(value)
+  }
+
+  sortByDate(direction: 'asc' | 'desc') {
+
+    const sorted = [...this.weatherData()].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+
+      return direction === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    this.weatherData.set(sorted);
+  }
+
+  dateSortDirection: 'asc' | 'desc' = 'asc';
+
+  toggleDateSort() {
+
+    this.sortByDate(this.dateSortDirection);
+    this.dateSortDirection = this.dateSortDirection === 'asc' ? 'desc' : 'asc';
+  }
+
 }
