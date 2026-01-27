@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Weather_App.Interfaces;
+using Weather_App.Models;
 using Weather_App.Services;
 
 namespace Weather_App.Controllers
@@ -16,7 +18,7 @@ namespace Weather_App.Controllers
         }
 
         [HttpGet]
-        public async Task<List<HistoricalWeatherResponse?>> GetWeather(
+        public async Task<WeatherResponse> GetWeather(
             double latitude,
             double longitude,
             string? startDate = "",
@@ -25,7 +27,8 @@ namespace Weather_App.Controllers
             string? hourly = null,
             string? timeZone = "auto")
         {
-            return await _service.GetWeatherAsync(latitude, longitude, startDate, endDate, daily, hourly, timeZone);
+            var response = await _service.GetWeatherAsync(latitude, longitude, startDate, endDate, daily, hourly, timeZone);
+            return response;
         }
     }
 }

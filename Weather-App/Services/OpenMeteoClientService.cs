@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Weather_App.Interfaces;
+using Weather_App.Models;
 
 namespace Weather_App.Services
 {
@@ -8,14 +9,18 @@ namespace Weather_App.Services
     {
         private readonly IHttpService _httpService;
         private readonly IWebHostEnvironment _env;
+        private readonly Dictionary<string, string> _errorsHash;
 
         public OpenMeteoClientService(IHttpService httpService, IWebHostEnvironment env)
         {
             _httpService = httpService;
             _env = env;
+
+            _errorsHash = new();
+            _errorsHash[Constants.Common] = string.Empty;
         }
 
-        public async Task<List<HistoricalWeatherResponse?>> GetWeatherAsync(
+        public async Task<WeatherResponse> GetWeatherAsync(
             double latitude,
             double longitude,
             string? startDate,
@@ -24,66 +29,67 @@ namespace Weather_App.Services
             string? hourly = null,
             string? timezone = "auto")
         {
-            // Read latitude, longitude, daily, and timezone from inputs.json
-            var inputs = ReadInputsFromFile();
+            var weatherResponse = new WeatherResponse(_errorsHash);
 
-            var results = new List<HistoricalWeatherResponse?>();
+            // Read latitude, longitude, daily, and timezone from inputs.json
             var dates = ReadDatesFromFile();
+            var inputs = ReadOtherInputsFromFile();
 
             foreach (var dateRange in dates)
             {
                 var val = await _httpService.GetHistoricalWeatherAsync(
-                    inputs.Latitude,
-                    inputs.Longitude,
-                    dateRange.Start,
-                    dateRange.End,
-                    inputs.Daily,
-                    hourly,
-                    inputs.Timezone);
-                
+                                                latitude,
+                                                longitude,
+                                                dateRange.Start,
+                                                dateRange.End,
+                                                inputs.Daily,
+                                                hourly,
+                                                inputs.Timezone);
+
                 // Save the JSON response to a file
                 if (val != null)
                 {
                     SaveWeatherDataToFile(val, dateRange.Start);
+                    weatherResponse.WeatherDataList.Add(val);
                 }
-                
-                results.Add(val);
             }
+            SaveWeatherErrorsToFile(weatherResponse.ErrorsHash);
 
-            return results;
+            return weatherResponse;
         }
 
         private List<(string Start, string End)> ReadDatesFromFile()
         {
-            List<string> errors = new List<string>();
             var results = new List<(string Start, string End)>();
 
-            var filePath = Path.Combine(_env.ContentRootPath, @"Files\weather-inputs", "dates.txt");
+            var fileName = "dates.txt";
+            var filePath = Path.Combine(_env.ContentRootPath, @"Files\weather-inputs", fileName);
             if (!File.Exists(filePath))
             {
-                throw new FileNotFoundException($"Dates file not found at {filePath}");
+                _errorsHash[Constants.Common] += $"File {fileName} is not found at {filePath}. ";
+                return results;
             }
 
             var lines = File.ReadAllLines(filePath)
                             .Where(line => !string.IsNullOrWhiteSpace(line))
                             .ToList();
-
             if (lines.Count == 0)
             {
-                throw new InvalidOperationException("No dates found in the dates.txt file");
+                _errorsHash[Constants.Common] += "No dates found in the {dates.txt} file. ";
+                return results;
             }
 
             var parsedDates = new List<DateTime>();
 
-            foreach (var line in lines)
+            foreach (var dateLine in lines)
             {
-                if (DateTime.TryParse(line, out var date))
+                if (DateTime.TryParse(dateLine, out var date))
                 {
                     parsedDates.Add(date);
                 }
                 else
                 {
-                    errors.Add($"Invalid date format: {line}");
+                    _errorsHash[dateLine] = $"{dateLine} is an invalid date";
                     // TEJ: Commented below is the Copilot generated exception-throw
                     //throw new FormatException($"Unable to parse date: {line}. Please use a valid date format.");
                 }
@@ -103,13 +109,15 @@ namespace Weather_App.Services
             return results;
         }
 
-        private InputData ReadInputsFromFile()
+        private OtherInputData ReadOtherInputsFromFile()
         {
-            var filePath = Path.Combine(_env.ContentRootPath, @"Files\weather-inputs", "other-inputs.json");
+            var fileName = "other-inputs.json";
+            var filePath = Path.Combine(_env.ContentRootPath, @"Files\weather-inputs", fileName);
 
             if (!File.Exists(filePath))
             {
-                throw new FileNotFoundException($"Inputs file not found at {filePath}");
+                _errorsHash[Constants.Common] += $"File {fileName} is not found at {filePath}. ";
+                return new OtherInputData();
             }
 
             var jsonContent = File.ReadAllText(filePath);
@@ -120,11 +128,11 @@ namespace Weather_App.Services
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
 
-            var inputs = JsonSerializer.Deserialize<InputData>(jsonContent, options);
-
+            var inputs = JsonSerializer.Deserialize<OtherInputData>(jsonContent, options);
             if (inputs == null)
             {
-                throw new InvalidOperationException("Failed to deserialize inputs.json file");
+                _errorsHash[Constants.Common] += $"Failed to deserialize {fileName} file. ";
+                return new OtherInputData();
             }
 
             return inputs;
@@ -167,23 +175,47 @@ namespace Weather_App.Services
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Failed to save weather data to file for date {startDate}", ex);
+                _errorsHash[Constants.Common] += $"Failed to save weather-data to file for the date {startDate} - {ex.Message}. ";
             }
         }
-    }
 
-    public class InputData
-    {
-        [JsonPropertyName("latitude")]
-        public double Latitude { get; set; }
+        private void SaveWeatherErrorsToFile(Dictionary<string, string> errorsHash)
+        {
+            try
+            {
+                // Create the weather-data folder if it doesn't exist
+                var weatherDataFolder = Path.Combine(_env.ContentRootPath, @"Files\weather-data");
+                if (!Directory.Exists(weatherDataFolder))
+                {
+                    Directory.CreateDirectory(weatherDataFolder);
+                }
 
-        [JsonPropertyName("longitude")]
-        public double Longitude { get; set; }
+                foreach (var error in errorsHash)
+                {
+                    if (string.IsNullOrWhiteSpace(error.Key) || string.IsNullOrWhiteSpace(error.Value))
+                    {
+                        continue;
+                    }
 
-        [JsonPropertyName("daily")]
-        public string? Daily { get; set; }
+                    // Create filename using the start date
+                    var fileName = $"{error.Key}.json";
+                    var filePath = Path.Combine(weatherDataFolder, fileName);
 
-        [JsonPropertyName("timezone")]
-        public string? Timezone { get; set; }
+                    try
+                    {
+                        // Write the JSON to the file
+                        File.WriteAllText(filePath, error.Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        _errorsHash[Constants.Common] += $"Failed to save weather-errors to file {fileName} - {ex.Message}. ";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorsHash[Constants.Common] += $"Failed to access/save weather-errors folder - {ex.Message}. ";
+            }
+        }
     }
 }

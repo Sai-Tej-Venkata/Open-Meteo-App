@@ -1,5 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Weather_App.Interfaces;
+using Weather_App.Models;
 
 namespace Weather_App.Services
 {
@@ -12,38 +14,6 @@ namespace Weather_App.Services
         {
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri(OpenMeteoBaseUrl);
-        }
-
-        public async Task<T?> GetAsync<T>(string url)
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-
-                var content = await response.Content.ReadAsStringAsync();
-                return System.Text.Json.JsonSerializer.Deserialize<T>(content, new System.Text.Json.JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                });
-            }
-            catch (HttpRequestException ex)
-            {
-                throw new InvalidOperationException($"Failed to fetch data from {url}", ex);
-            }
-        }
-
-        public async Task<string> GetStringAsync(string url)
-        {
-            try
-            {
-                return await _httpClient.GetStringAsync(url);
-            }
-            catch (HttpRequestException ex)
-            {
-                throw new InvalidOperationException($"Failed to fetch data from {url}", ex);
-            }
         }
 
         public async Task<HistoricalWeatherResponse?> GetHistoricalWeatherAsync(
@@ -66,7 +36,7 @@ namespace Weather_App.Services
                     $"timezone={timezone}"
                 };
 
-                if (!string.IsNullOrEmpty(daily))
+                 if (!string.IsNullOrEmpty(daily))
                 {
                     queryParams.Add($"daily={daily.Replace(" ", "")}");
                 }
@@ -77,63 +47,22 @@ namespace Weather_App.Services
                 }
 
                 var url = $"https://archive-api.open-meteo.com/v1/archive?{string.Join("&", queryParams)}";
-                return await GetAsync<HistoricalWeatherResponse>(url);
+                //return await GetAsync<HistoricalWeatherResponse>(url);
+
+                var response = await _httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<HistoricalWeatherResponse>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Failed to fetch historical weather data from Open-Meteo API", ex);
             }
         }
-    }
-
-    public class HistoricalWeatherResponse
-    {
-        [JsonPropertyName("latitude")]
-        public double Latitude { get; set; }
-
-        [JsonPropertyName("longitude")]
-        public double Longitude { get; set; }
-
-        [JsonPropertyName("generationtime_ms")]
-        public double GenerationtimeMs { get; set; }
-
-        [JsonPropertyName("timezone")]
-        public string? Timezone { get; set; }
-
-        [JsonPropertyName("daily")]
-        public DailyData? Daily { get; set; }
-
-        [JsonPropertyName("hourly")]
-        public HourlyData? Hourly { get; set; }
-    }
-
-    public class DailyData
-    {
-        [JsonPropertyName("time")]
-        public List<string>? Time { get; set; }
-
-        [JsonPropertyName("temperature_2m_max")]
-        public List<double>? TemperatureMax { get; set; }
-
-        [JsonPropertyName("temperature_2m_min")]
-        public List<double>? TemperatureMin { get; set; }
-
-        [JsonPropertyName("precipitation")]
-        public List<double>? Precipitation { get; set; }
-
-        [JsonPropertyName("weather_code")]
-        public List<int>? WeatherCode { get; set; }
-    }
-
-    public class HourlyData
-    {
-        [JsonPropertyName("time")]
-        public List<string>? Time { get; set; }
-
-        [JsonPropertyName("temperature_2m")]
-        public List<double>? Temperature { get; set; }
-
-        [JsonPropertyName("precipitation")]
-        public List<double>? Precipitation { get; set; }
     }
 }
