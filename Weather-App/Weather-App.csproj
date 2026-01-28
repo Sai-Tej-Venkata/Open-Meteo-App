@@ -29,6 +29,9 @@
   <ItemGroup>
     <Content Include="AppAngular\dist\**\*.*" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="AppReact\" />
+  </ItemGroup>
   
   <!-- Build the client app during publish if package.json exists -->
   <Target Name="BuildClient" BeforeTargets="PrepareForPublish" Condition="Exists('$(SpaRoot)package.json')">
