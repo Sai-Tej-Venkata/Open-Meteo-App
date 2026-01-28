@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <!-- Root folder for the Angular client app -->
-    <SpaRoot>ClientApp\</SpaRoot>
+    <SpaRoot>AppAngular\</SpaRoot>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,14 +20,14 @@
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.0" />
   </ItemGroup>
 
-  <!-- Disable implicit Content items to avoid duplicate Content errors for ClientApp files -->
+  <!-- Disable implicit Content items to avoid duplicate Content errors for AppAngular files -->
   <PropertyGroup>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
 
   <!-- Include only the built Angular output in publish output -->
   <ItemGroup>
-    <Content Include="ClientApp\dist\**\*.*" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="AppAngular\dist\**\*.*" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   
   <!-- Build the client app during publish if package.json exists -->
