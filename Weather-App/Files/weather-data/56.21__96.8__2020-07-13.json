@@ -1,0 +1,20 @@
+{
+  "latitude": 56.203865,
+  "longitude": 96.865974,
+  "generationtime_ms": 56.15699291229248,
+  "timezone": "Asia/Krasnoyarsk",
+  "daily": {
+    "time": [
+      "2020-07-13"
+    ],
+    "temperature_2m_max": [
+      26.4
+    ],
+    "temperature_2m_min": [
+      14.2
+    ],
+    "precipitation": null,
+    "weather_code": null
+  },
+  "hourly": null
+}

@@ -1,17 +1,17 @@
 {
-  "latitude": 32.794376,
-  "longitude": 96.82152,
-  "generationtime_ms": 2.3927688598632812,
-  "timezone": "Asia/Shanghai",
+  "latitude": 56.203865,
+  "longitude": 96.865974,
+  "generationtime_ms": 112.24579811096191,
+  "timezone": "Asia/Krasnoyarsk",
   "daily": {
     "time": [
-      "2021-02-27"
+      "2022-06-02"
     ],
     "temperature_2m_max": [
-      1.1
+      18
     ],
     "temperature_2m_min": [
-      -11.1
+      9.9
     ],
     "precipitation": null,
     "weather_code": null

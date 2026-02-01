@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 using Weather_App.Interfaces;
 using Weather_App.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Weather_App.Services
 {
@@ -39,7 +38,7 @@ namespace Weather_App.Services
 
             foreach (var dateRange in dates)
             {
-                string filePath = GetWeatherDataFilePath($"{dateRange.Start}.json");
+                string filePath = GetWeatherDataFilePath(latitude, longitude, dateRange.Start);
                 // Check if file exists and has content
                 if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
                 {
@@ -164,11 +163,12 @@ namespace Weather_App.Services
             return weatherDataFolder;
         }
 
-        private string GetWeatherDataFilePath(string fileName)
+        private string GetWeatherDataFilePath(double latitude, double longitude, string startDate)
         {
             var weatherDataFolder = GetWeatherDataFolder();
-            var filePath = Path.Combine(weatherDataFolder, fileName);
-            return filePath;
+            string fileName = $"{latitude}__{longitude}__{startDate}.json";
+
+            return Path.Combine(weatherDataFolder, fileName);
         }
 
         private void SaveWeatherDataToFile(string startDate, string filePath, HistoricalWeatherResponse response)
