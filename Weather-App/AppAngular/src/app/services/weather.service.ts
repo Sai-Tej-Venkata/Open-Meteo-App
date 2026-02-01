@@ -2,15 +2,31 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { AppConfigService } from '../core/config/app-config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WeatherService {
-  private apiUrl = 'https://localhost:7174/api/v1/weather';
+  private apiUrl = '';
   private healthUrl = 'https://localhost:7174/api/health';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private appConfigService: AppConfigService) {
+    // Config should already be loaded by APP_INITIALIZER, but handle gracefully
+    const configUrl = this.appConfigService.get<string>('weatherApiUrl');
+    if (configUrl) {
+      this.apiUrl = configUrl;
+    } else {
+      console.error('Weather API URL not found in config, using default');
+    }
+  }
+
+  initializeApiUrl(): void {
+    const configUrl = this.appConfigService.get<string>('weatherApiUrl');
+    if (configUrl) {
+      this.apiUrl = configUrl;
+      console.log('Weather API URL initialized from config:', this.apiUrl);
+    }
   }
 
   testConnection(): Observable<any> {

@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Weather_App.Interfaces;
 using Weather_App.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Weather_App.Services
 {
@@ -23,37 +24,50 @@ namespace Weather_App.Services
         public async Task<WeatherResponse> GetWeatherAsync(
             double latitude,
             double longitude,
-            string? startDate,
-            string? endDate,
-            string? daily = null,
-            string? hourly = null,
-            string? timezone = "auto")
+            string startDate = null,
+            string endDate = null,
+            string daily = null,
+            string hourly = null,
+            string timezone = "auto")
         {
             var weatherResponse = new WeatherResponse(_errorsHash);
 
             // Read latitude, longitude, daily, and timezone from inputs.json
             var dates = ReadDatesFromFile();
             var inputs = ReadOtherInputsFromFile();
+            HistoricalWeatherResponse historicalWeatherResponse;
 
             foreach (var dateRange in dates)
             {
-                var val = await _httpService.GetHistoricalWeatherAsync(
-                                                latitude,
-                                                longitude,
-                                                dateRange.Start,
-                                                dateRange.End,
-                                                inputs.Daily,
-                                                hourly,
-                                                inputs.Timezone);
+                string filePath = GetWeatherDataFilePath($"{dateRange.Start}.json");
+                // Check if file exists and has content
+                if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
+                {
+                    // File exists and is not empty, read the file content and add to the response list.
+                    var jsonContent = File.ReadAllText(filePath);
+                    historicalWeatherResponse = JsonSerializer.Deserialize<HistoricalWeatherResponse>(jsonContent) ?? new ();
+                    weatherResponse.WeatherDataList.Add(historicalWeatherResponse);
+                    continue;
+                }
+
+                // File does not exist or is empty, so lets make the API call
+                historicalWeatherResponse = await _httpService.GetHistoricalWeatherAsync(
+                                                    latitude,
+                                                    longitude,
+                                                    dateRange.Start,
+                                                    dateRange.End,
+                                                    inputs.Daily,
+                                                    hourly,
+                                                    inputs.Timezone);
 
                 // Save the JSON response to a file
-                if (val != null)
+                if (historicalWeatherResponse != null)
                 {
-                    SaveWeatherDataToFile(val, dateRange.Start);
-                    weatherResponse.WeatherDataList.Add(val);
+                    SaveWeatherDataToFile(dateRange.Start, filePath, historicalWeatherResponse);
+                    weatherResponse.WeatherDataList.Add(historicalWeatherResponse);
                 }
             }
-            SaveWeatherErrorsToFile(weatherResponse.ErrorsHash);
+            SaveWeatherErrorsToFile();
 
             return weatherResponse;
         }
@@ -138,36 +152,37 @@ namespace Weather_App.Services
             return inputs;
         }
 
-        private void SaveWeatherDataToFile(HistoricalWeatherResponse response, string startDate)
+        private string GetWeatherDataFolder()
         {
+            // Create the weather-data folder if it doesn't exist
+            var weatherDataFolder = Path.Combine(_env.ContentRootPath, @"Files\weather-data");
+            if (!Directory.Exists(weatherDataFolder))
+            {
+                Directory.CreateDirectory(weatherDataFolder);
+            }
+
+            return weatherDataFolder;
+        }
+
+        private string GetWeatherDataFilePath(string fileName)
+        {
+            var weatherDataFolder = GetWeatherDataFolder();
+            var filePath = Path.Combine(weatherDataFolder, fileName);
+            return filePath;
+        }
+
+        private void SaveWeatherDataToFile(string startDate, string filePath, HistoricalWeatherResponse response)
+        {
+            // Serialize the response to JSON
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                // TEJ: Changed Copilot-generated JsonIgnoreCondition.WhenWritingNull to Never.
+                DefaultIgnoreCondition = JsonIgnoreCondition.Never
+            };
+
             try
             {
-                // Create the weather-data folder if it doesn't exist
-                var weatherDataFolder = Path.Combine(_env.ContentRootPath, @"Files\weather-data");
-                if (!Directory.Exists(weatherDataFolder))
-                {
-                    Directory.CreateDirectory(weatherDataFolder);
-                }
-
-                // Create filename using the start date
-                var fileName = $"{startDate}.json";
-                var filePath = Path.Combine(weatherDataFolder, fileName);
-
-                // Check if file exists and has content
-                if (File.Exists(filePath) && new FileInfo(filePath).Length > 0)
-                {
-                    // File exists and is not empty, skip saving
-                    return;
-                }
-
-                // Serialize the response to JSON
-                var options = new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    // TEJ: Changed Copilot-generated JsonIgnoreCondition.WhenWritingNull to Never.
-                    DefaultIgnoreCondition = JsonIgnoreCondition.Never
-                };
-
                 var jsonContent = JsonSerializer.Serialize(response, options);
 
                 // Write the JSON to the file
@@ -179,18 +194,18 @@ namespace Weather_App.Services
             }
         }
 
-        private void SaveWeatherErrorsToFile(Dictionary<string, string> errorsHash)
+        private void SaveWeatherErrorsToFile()
         {
+            // Create the weather-data folder if it doesn't exist
+            var weatherDataFolder = Path.Combine(_env.ContentRootPath, @"Files\weather-data");
+            if (!Directory.Exists(weatherDataFolder))
+            {
+                Directory.CreateDirectory(weatherDataFolder);
+            }
+
             try
             {
-                // Create the weather-data folder if it doesn't exist
-                var weatherDataFolder = Path.Combine(_env.ContentRootPath, @"Files\weather-data");
-                if (!Directory.Exists(weatherDataFolder))
-                {
-                    Directory.CreateDirectory(weatherDataFolder);
-                }
-
-                foreach (var error in errorsHash)
+                foreach (var error in _errorsHash.Where(x => x.Key != Constants.Common))
                 {
                     if (string.IsNullOrWhiteSpace(error.Key) || string.IsNullOrWhiteSpace(error.Value))
                     {
@@ -215,6 +230,26 @@ namespace Weather_App.Services
             catch (Exception ex)
             {
                 _errorsHash[Constants.Common] += $"Failed to access/save weather-errors folder - {ex.Message}. ";
+            }
+            finally
+            {
+                SaveOtherErrorsToFile(weatherDataFolder);
+            }
+        }
+
+        private void SaveOtherErrorsToFile(string weatherDataFolder)
+        {
+            string fileName = "other-errors.json";
+            var filePath = Path.Combine(weatherDataFolder, fileName);
+
+            try
+            {
+                // Write the JSON to the file
+                File.WriteAllText(filePath, _errorsHash.SingleOrDefault(x => x.Key == Constants.Common).Value);
+            }
+            catch (Exception ex)
+            {
+                _errorsHash[Constants.Common] += $"Failed to save weather-errors to file {fileName} - {ex.Message}. ";
             }
         }
     }

@@ -1,0 +1,4 @@
+{
+  "weatherApiUrl": "https://localhost:7174/api/v1/weather",
+  "appName": "Weather App"
+}

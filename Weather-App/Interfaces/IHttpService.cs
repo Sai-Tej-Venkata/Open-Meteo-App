@@ -5,13 +5,13 @@ namespace Weather_App.Interfaces
 {
     public interface IHttpService
     {
-        Task<HistoricalWeatherResponse?> GetHistoricalWeatherAsync(
+        Task<HistoricalWeatherResponse> GetHistoricalWeatherAsync(
             double latitude,
             double longitude,
-            string? startDate,
-            string? endDate,
-            string? daily = null,
-            string? hourly = null,
-            string? timezone = null);
+            string startDate = null,
+            string endDate = null,
+            string daily = null,
+            string hourly = null,
+            string timezone = null);
     }
 }
