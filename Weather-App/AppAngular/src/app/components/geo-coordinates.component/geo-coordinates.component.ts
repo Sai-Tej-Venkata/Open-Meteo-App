@@ -14,7 +14,10 @@ export class GeoCoordinatesComponent implements OnInit {
   @Output() latitudeChange = new EventEmitter<number>();
   @Output() longitudeChange = new EventEmitter<number>();
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.updateLatitude(this.latitude.toString());
+    this.updateLongitude(this.longitude.toString());
+  }
 
   updateLatitude(value: string) {
     console.log('updateLatitude');

@@ -28,8 +28,8 @@ interface WeatherErros {
   styleUrl: './weather-display.component.scss',
 })
 export class WeatherDisplayComponent implements OnInit {
-  latitude: number | undefined;
-  longitude: number | undefined;
+  latitude: number = 0;
+  longitude: number = 0;
 
   weatherIndex = signal<WeatherDataIndex>({
     latitude: 0,
