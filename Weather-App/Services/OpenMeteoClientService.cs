@@ -190,7 +190,7 @@ namespace Weather_App.Services
             }
             catch (Exception ex)
             {
-                _errorsHash[Constants.Common] += $"Failed to save weather-data to file for the date {startDate} - {ex.Message}. ";
+                _errorsHash[Constants.Common] += $"Failed to save weather-data to file for the date {startDate} - {ex.Message} ";
             }
         }
 
@@ -223,13 +223,13 @@ namespace Weather_App.Services
                     }
                     catch (Exception ex)
                     {
-                        _errorsHash[Constants.Common] += $"Failed to save weather-errors to file {fileName} - {ex.Message}. ";
+                        _errorsHash[Constants.Common] += $"Failed to save weather-errors to file {fileName} - {ex.Message} ";
                     }
                 }
             }
             catch (Exception ex)
             {
-                _errorsHash[Constants.Common] += $"Failed to access/save weather-errors folder - {ex.Message}. ";
+                _errorsHash[Constants.Common] += $"Failed to access/save weather-errors folder - {ex.Message} ";
             }
             finally
             {
@@ -249,7 +249,7 @@ namespace Weather_App.Services
             }
             catch (Exception ex)
             {
-                _errorsHash[Constants.Common] += $"Failed to save weather-errors to file {fileName} - {ex.Message}. ";
+                _errorsHash[Constants.Common] += $"Failed to save weather-errors to file {fileName} - {ex.Message} ";
             }
         }
     }
