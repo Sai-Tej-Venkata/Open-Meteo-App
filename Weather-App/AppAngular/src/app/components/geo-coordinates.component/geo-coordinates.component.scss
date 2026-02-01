@@ -1,0 +1,23 @@
+
+.geo-coords-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  label {
+    width: 120px;
+    font-weight: 600;
+  }
+
+  input, select {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+
+.geo-coords {
+    width: 10%;
+}

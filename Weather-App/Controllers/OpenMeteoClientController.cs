@@ -21,11 +21,11 @@ namespace Weather_App.Controllers
         public async Task<WeatherResponse> GetWeather(
             double latitude,
             double longitude,
-            string? startDate = "",
-            string? endDate = "",
-            string? daily = null,
-            string? hourly = null,
-            string? timeZone = "auto")
+            string startDate = "",
+            string endDate = "",
+            string daily = null,
+            string hourly = null,
+            string timeZone = "auto")
         {
             var response = await _service.GetWeatherAsync(latitude, longitude, startDate, endDate, daily, hourly, timeZone);
             return response;

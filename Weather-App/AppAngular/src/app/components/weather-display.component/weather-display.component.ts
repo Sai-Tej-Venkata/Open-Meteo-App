@@ -1,6 +1,7 @@
-import { Component, OnInit, signal, effect } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WeatherService } from '../../services/weather.service';
+import { GeoCoordinatesComponent } from "../geo-coordinates.component/geo-coordinates.component";
 
 interface WeatherDataIndex {
   latitude: number;
@@ -20,16 +21,15 @@ interface WeatherErros {
   error: string;
 }
 
-
 @Component({
   selector: 'app-weather-display',
-  imports: [CommonModule],
+  imports: [CommonModule, GeoCoordinatesComponent],
   templateUrl: './weather-display.component.html',
   styleUrl: './weather-display.component.scss',
 })
 export class WeatherDisplayComponent implements OnInit {
-  latitude: number = 32.78;
-  longitude: number = 96.8;
+  latitude: number | undefined;
+  longitude: number | undefined;
 
   weatherIndex = signal<WeatherDataIndex>({
     latitude: 0,
@@ -166,12 +166,12 @@ export class WeatherDisplayComponent implements OnInit {
     }
   }
 
-  updateLatitude(value: string) {
-    this.latitude = Number(value)
+  updateLatitude(value: number) {
+    this.latitude = value;
   }
 
-  updateLongitude(value: string) {
-      this.longitude = Number(value)
+  updateLongitude(value: number) {
+    this.longitude = value;
   }
 
   sortByDate(direction: 'asc' | 'desc') {

@@ -1,23 +1,12 @@
 <div class="weather-display-container">
-
   <h1 class="app-title">Weather App</h1>
 
-  <div class="app-section">
-    <h2>Geo Coordinates</h2>
-  </div>
-
-  <div class="weather-index">
-    <label>Latitude:</label>
-    <div class="geo-coords">
-      <input type="number" [value]="latitude" step="0.01" (input)="updateLatitude($event.target.value)" />
-    </div>
-  </div>
-
-  <div class="weather-index">
-    <label>Longitude:</label>
-    <div class="geo-coords">
-      <input type="number" [value]="longitude" step="0.01" (input)="updateLongitude($event.target.value)" />
-    </div>
+  <div>
+    <app-geo-coordinates
+      (latitudeChange)="updateLatitude($event)"
+      (longitudeChange)="updateLongitude($event)"
+    >
+    </app-geo-coordinates>
   </div>
 
   <div>
@@ -37,17 +26,17 @@
 
     <div class="weather-index">
       <label>Latitude:</label>
-      {{weatherIndex().latitude}}
+      {{ weatherIndex().latitude }}
     </div>
 
     <div class="weather-index">
       <label>Longitude:</label>
-      {{weatherIndex().longitude}}
+      {{ weatherIndex().longitude }}
     </div>
 
     <div class="weather-index">
       <label>Timezone:</label>
-      {{weatherIndex().timezone}}
+      {{ weatherIndex().timezone }}
     </div>
 
     <table class="weather-table">
@@ -77,10 +66,9 @@
     </div>
 
     <div *ngFor="let errors of weatherApiErrors()">
-      <div class="flagError"> {{ errors[1] }}</div>
+      <div class="flagError">{{ errors[1] }}</div>
     </div>
 
     <p></p>
-
   </div>
 </div>

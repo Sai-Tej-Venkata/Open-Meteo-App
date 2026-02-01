@@ -1,5 +1,4 @@
 using Weather_App.Models;
-using Weather_App.Services;
 
 namespace Weather_App.Interfaces
 {
@@ -8,10 +7,10 @@ namespace Weather_App.Interfaces
         Task<WeatherResponse> GetWeatherAsync(
             double latitude,
             double longitude,
-            string? startDate,
-            string? endDate,
-            string? daily = null,
-            string? hourly = null,
-            string? timezone = "auto");
+            string startDate = null,
+            string endDate = null,
+            string daily = null,
+            string hourly = null,
+            string timezone = "auto");
     }
 }
