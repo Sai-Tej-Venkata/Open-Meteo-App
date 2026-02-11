@@ -20,24 +20,6 @@ class WeatherDisplay extends Component {
     };
   }
 
-  static WeatherDataIndex = {
-    latitude: PropTypes.number,
-    longitude: PropTypes.number,
-    timezone: PropTypes.string,
-  };
-
-  static WeatherDataItem = {
-    date: PropTypes.string,
-    temperatureMax: PropTypes.number,
-    temperatureMin: PropTypes.number,
-    precipitation: PropTypes.number,
-  };
-
-  static WeatherErrors = {
-    date: PropTypes.string,
-    error: PropTypes.string,
-  };
-
   handleLatitudeChange = (latitude) => {
     this.setState({ latitude: parseFloat(latitude) });
   };
