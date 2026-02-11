@@ -1,0 +1,20 @@
+{
+  "latitude": 32.724075,
+  "longitude": 96.81319,
+  "generationtime_ms": 2.5655031204223633,
+  "timezone": "Asia/Shanghai",
+  "daily": {
+    "time": [
+      "2020-07-13"
+    ],
+    "temperature_2m_max": [
+      11
+    ],
+    "temperature_2m_min": [
+      3.5
+    ],
+    "precipitation": null,
+    "weather_code": null
+  },
+  "hourly": null
+}
