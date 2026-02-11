@@ -236,7 +236,7 @@ class WeatherDisplay extends Component {
             {this.state.weatherData && this.state.weatherData.errorsHash && Object.keys(this.state.weatherData.errorsHash).length > 0 ? (
               <div>
                 {Object.entries(this.state.weatherData.errorsHash).map(([key, error]) => (
-                  <div key={key} className="flagError" style={{ marginBottom: "10px", padding: "10px", backgroundColor: "#ffe6e6", borderLeft: "4px solid #ff0000" }}>
+                  <div key={key} className="flagError">
                     <strong>{key}:</strong> {error}
                   </div>
                 ))}
