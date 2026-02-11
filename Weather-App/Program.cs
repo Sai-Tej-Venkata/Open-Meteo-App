@@ -43,7 +43,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     
     // Serve Angular in development
-    var clientAppPath = Path.Combine(app.Environment.ContentRootPath, "ClientApp", "dist");
+    var clientAppPath = Path.Combine(app.Environment.ContentRootPath, "AppAngular", "dist");
     if (Directory.Exists(clientAppPath))
     {
         var fileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(clientAppPath);
@@ -59,7 +59,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     // Serve the Angular client in production
-    var clientAppPath = Path.Combine(app.Environment.ContentRootPath, "ClientApp", "dist");
+    var clientAppPath = Path.Combine(app.Environment.ContentRootPath, "AppAngular", "dist");
     var fileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(clientAppPath);
     
     var defaultFilesOptions = new DefaultFilesOptions { FileProvider = fileProvider };

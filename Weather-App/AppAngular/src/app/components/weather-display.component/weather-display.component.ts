@@ -134,30 +134,6 @@ export class WeatherDisplayComponent implements OnInit {
 
         this.weatherApiErrors.set(Object.entries(resultErrors));
         console.log(this.weatherApiErrors());
-
-        /*
-        resultErrors.forEach((response: any, responseIndex: number) => {
-          console.log(`Processing error ${responseIndex + 1} of ${weatherResult.length}`);
-
-          if (response) {
-            const { date, error } = response;
-
-            console.log(date, error);
-
-            //const transformedRecords = time?.map((date: string, index: number) => ({
-            //  date,
-            //  temperatureMax: temperature_2m_max?.[index] ?? 0,
-            //  temperatureMin: temperature_2m_min?.[index] ?? 0,
-            //  precipitation: precipitation?.[index] ?? 0,
-            //})) || [];
-
-            //allWeatherData.push(...transformedRecords);
-          }
-        });
-
-        console.log(`✅ Transformed ${allWeatherData.length} total weather records from ${apiResponse.length} response(s)`);
-        this.weatherData.set(allWeatherData);
-        */
       }
 
     } catch (error) {

@@ -21,14 +21,6 @@ export class WeatherService {
     }
   }
 
-  initializeApiUrl(): void {
-    const configUrl = this.appConfigService.get<string>('weatherApiUrl');
-    if (configUrl) {
-      this.apiUrl = configUrl;
-      console.log('Weather API URL initialized from config:', this.apiUrl);
-    }
-  }
-
   testConnection(): Observable<any> {
     console.log('Testing connection to:', this.healthUrl);
     return this.http.get<any>(this.healthUrl).pipe(

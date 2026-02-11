@@ -1,18 +1,18 @@
 # Whitelist ClientApp source code while ignoring node_modules and build artifacts
-!ClientApp/
-!ClientApp/src/
-!ClientApp/src/**
-!ClientApp/angular.json
-!ClientApp/package.json
-!ClientApp/package-lock.json
-!ClientApp/tsconfig.json
-!ClientApp/tsconfig.app.json
-!ClientApp/tsconfig.spec.json
-!ClientApp/.gitignore
-!ClientApp/README.md
+!AppAngular/
+!AppAngular/src/
+!AppAngular/src/**
+!AppAngular/angular.json
+!AppAngular/package.json
+!AppAngular/package-lock.json
+!AppAngular/tsconfig.json
+!AppAngular/tsconfig.app.json
+!AppAngular/tsconfig.spec.json
+!AppAngular/.gitignore
+!AppAngular/README.md
 
 # But still ignore build artifacts
-ClientApp/dist/
-ClientApp/node_modules/
-ClientApp/.angular/
-ClientApp/out-tsc/
+AppAngular/dist/
+AppAngular/node_modules/
+AppAngular/.angular/
+AppAngular/out-tsc/
