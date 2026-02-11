@@ -1,5 +1,4 @@
 import { Component } from "react";
-import PropTypes from "prop-types";
 import GeoCoordinates from "./GeoCoordinates";
 import { WeatherService } from "../services/WeatherService";
 
