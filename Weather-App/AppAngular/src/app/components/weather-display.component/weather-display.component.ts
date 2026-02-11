@@ -31,6 +31,8 @@ export class WeatherDisplayComponent implements OnInit {
   latitude: number = 0;
   longitude: number = 0;
 
+  dateSortDirection: 'asc' | 'desc' = 'asc';
+
   weatherIndex = signal<WeatherDataIndex>({
     latitude: 0,
     longitude: 0,
@@ -51,8 +53,6 @@ export class WeatherDisplayComponent implements OnInit {
 
   ngOnInit(): void {
     this.errorMessage.set(null);
-
-    //this.dateSortDirection = 'asc';
 
     // Test health-check endpoint first
     //this.weatherService.testConnection().subscribe({
@@ -156,13 +156,11 @@ export class WeatherDisplayComponent implements OnInit {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
 
-      return direction === 'asc' ? dateA - dateB : dateB - dateA;
+      return direction === 'desc' ? dateA - dateB : dateB - dateA;
     });
 
     this.weatherData.set(sorted);
   }
-
-  dateSortDirection: 'asc' | 'desc' = 'asc';
 
   toggleDateSort() {
 
