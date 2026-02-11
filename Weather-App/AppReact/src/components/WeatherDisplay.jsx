@@ -10,10 +10,13 @@ class WeatherDisplay extends Component {
     this.state = {
       latitude: 32.78,
       longitude: 96.8,
+      fetchedLatitude: null,
+      fetchedLongitude: null,
       timezone: null,
       weatherData: null,
       isLoading: false,
       error: null,
+      dateSortDirection: "asc",
     };
   }
 
@@ -43,8 +46,14 @@ class WeatherDisplay extends Component {
     this.setState({ longitude: parseFloat(longitude) });
   };
 
+  toggleDateSort = () => {
+    this.setState((prevState) => ({
+      dateSortDirection: prevState.dateSortDirection === "asc" ? "desc" : "asc",
+    }));
+  };
+
   renderWeatherTableRows = () => {
-    const { weatherData } = this.state;
+    const { weatherData, dateSortDirection } = this.state;
     
     if (!weatherData) {
       return (
@@ -77,19 +86,33 @@ class WeatherDisplay extends Component {
           const precip = weather.daily.precipitation || [];
 
           times.forEach((date, index) => {
-            allRows.push(
-              <tr key={`${weather.latitude}-${date}-${index}`}>
-                <td>{date}</td>
-                <td>{tempMax[index] || "N/A"}</td>
-                <td>{tempMin[index] || "N/A"}</td>
-                <td>{precip && precip[index] ? precip[index] : "N/A"}</td>
-              </tr>
-            );
+            allRows.push({
+              date,
+              tempMax: tempMax[index] || 0,
+              tempMin: tempMin[index] || 0,
+              precip: precip && precip[index] ? precip[index] : 0,
+              latitude: weather.latitude,
+              index,
+            });
           });
         }
       });
 
-      return allRows.length > 0 ? allRows : (
+      // Sort by date
+      allRows.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateSortDirection === "asc" ? dateA - dateB : dateB - dateA;
+      });
+
+      return allRows.length > 0 ? allRows.map((row) => (
+        <tr key={`${row.latitude}-${row.date}-${row.index}`}>
+          <td>{row.date}</td>
+          <td>{row.tempMax}</td>
+          <td>{row.tempMin}</td>
+          <td>{row.precip}</td>
+        </tr>
+      )) : (
         <tr>
           <td colSpan="4" style={{ textAlign: "center" }}>No weather data available</td>
         </tr>
@@ -112,12 +135,28 @@ class WeatherDisplay extends Component {
         );
       }
 
-      return times.map((date, index) => (
-        <tr key={index}>
-          <td>{date}</td>
-          <td>{tempMax[index] || "N/A"}</td>
-          <td>{tempMin[index] || "N/A"}</td>
-          <td>{precip && precip[index] ? precip[index] : "N/A"}</td>
+      // Create array of data objects for sorting
+      const dataArray = times.map((date, index) => ({
+        date,
+        tempMax: tempMax[index] || "N/A",
+        tempMin: tempMin[index] || "N/A",
+        precip: precip && precip[index] ? precip[index] : "N/A",
+        index,
+      }));
+
+      // Sort by date
+      dataArray.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateSortDirection === "asc" ? dateA - dateB : dateB - dateA;
+      });
+
+      return dataArray.map((row) => (
+        <tr key={row.index}>
+          <td>{row.date}</td>
+          <td>{row.tempMax}</td>
+          <td>{row.tempMin}</td>
+          <td>{row.precip}</td>
         </tr>
       ));
     }
@@ -176,12 +215,12 @@ class WeatherDisplay extends Component {
 
             <div className="weather-index">
               <label>Latitude:</label>
-              {this.state.latitude}
+              {this.state.fetchedLatitude}
             </div>
 
             <div className="weather-index">
               <label>Longitude:</label>
-              {this.state.longitude}
+              {this.state.fetchedLongitude}
             </div>
 
             <div className="weather-index">
@@ -192,7 +231,12 @@ class WeatherDisplay extends Component {
             <table className="weather-table">
               <thead>
                 <tr>
-                  <th>Date</th>
+                  <th onClick={this.toggleDateSort} style={{ cursor: "pointer" }}>
+                    Date
+                    <span style={{ marginLeft: "8px" }}>
+                      {this.state.dateSortDirection === "asc" ? "▲" : "▼"}
+                    </span>
+                  </th>
                   <th>Temperature Max (°C)</th>
                   <th>Temperature Min (°C)</th>
                   <th>Precipitation (mm)</th>
@@ -238,23 +282,23 @@ class WeatherDisplay extends Component {
       console.log("Data structure - Keys:", Object.keys(data));
       console.log("Daily data:", data.daily);
 
-      // Extract latitude, longitude, and timezone from the first weather item in weatherDataList
-      let fetchedLatitude = latitude;
-      let fetchedLongitude = longitude;
+      // Extract timezone, latitude, and longitude from the first weather item in weatherDataList
       let fetchedTimezone = null;
+      let fetchedLatitude = null;
+      let fetchedLongitude = null;
 
       if (data.weatherDataList && data.weatherDataList.length > 0) {
         const firstWeather = data.weatherDataList[0];
-        fetchedLatitude = firstWeather.latitude || latitude;
-        fetchedLongitude = firstWeather.longitude || longitude;
         fetchedTimezone = firstWeather.timezone || null;
+        fetchedLatitude = firstWeather.latitude || null;
+        fetchedLongitude = firstWeather.longitude || null;
       }
 
       this.setState({
         weatherData: data,
-        latitude: fetchedLatitude,
-        longitude: fetchedLongitude,
         timezone: fetchedTimezone,
+        fetchedLatitude: fetchedLatitude,
+        fetchedLongitude: fetchedLongitude,
         isLoading: false,
       });
     } catch (error) {
